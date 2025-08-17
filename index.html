@@ -105,6 +105,7 @@
              <div class="p-6 sm:p-8 bg-blue-600 text-white text-center">
                 <h2 id="result-for-name" class="text-xl sm:text-2xl font-bold"></h2>
                 <h3 id="result-title" class="text-3xl sm:text-4xl font-extrabold mt-1"></h3>
+                <p id="result-abbreviation" class="text-lg font-mono tracking-widest mt-2 opacity-75"></p>
             </div>
             <div class="p-6 sm:p-8">
                 <!-- Honesty Feedback Section -->
@@ -148,6 +149,7 @@
         const resultContainer = document.getElementById('result-container');
         const resultForName = document.getElementById('result-for-name');
         const resultTitle = document.getElementById('result-title');
+        const resultAbbreviation = document.getElementById('result-abbreviation');
         const resultDescription = document.getElementById('result-description');
         const honestyFeedback = document.getElementById('honesty-feedback');
         const retryBtn = document.getElementById('retry-btn');
@@ -338,6 +340,7 @@
 
                 resultForName.textContent = `Keputusan Ujian untuk, ${studentName}!`;
                 resultTitle.textContent = resultData.title;
+                resultAbbreviation.textContent = `(${personality})`;
                 resultDescription.textContent = resultData.description;
                 document.getElementById('minat').innerHTML = `<h4 class="text-xl font-bold text-blue-700">${resultData.minat.title}</h4><p>${resultData.minat.hala_tuju}</p>`;
                 document.getElementById('belajar').innerHTML = `<h4 class="text-xl font-bold text-blue-700">${resultData.belajar.title}</h4><div class="p-4 bg-blue-50 rounded-lg mb-4"><p class="font-semibold">Rumusan Gaya Belajar:</p><p class="text-sm">${resultData.belajar.gaya_belajar}</p></div><ul class="list-disc list-inside space-y-2">${resultData.belajar.tips.map(tip => `<li>${tip}</li>`).join('')}</ul>`;
