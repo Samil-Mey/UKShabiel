@@ -113,6 +113,12 @@
                     <!-- Icon, title, and text will be injected here -->
                 </div>
                 <p id="result-description" class="text-md sm:text-lg text-center mb-8"></p>
+                
+                <!-- Abbreviation Explanation Section -->
+                <div id="abbreviation-explanation" class="mb-8 p-4 rounded-lg bg-gray-100">
+                    <!-- Explanation will be injected here -->
+                </div>
+
                 <div id="tabs-container" class="flex flex-wrap justify-center border-b border-gray-200 mb-6">
                     <button data-tab="minat" class="tab-button active text-sm sm:text-base font-semibold py-3 px-4 sm:px-6 focus:outline-none">Hala Tuju Anda</button>
                     <button data-tab="belajar" class="tab-button text-sm sm:text-base font-semibold py-3 px-4 sm:px-6 focus:outline-none">Cara Belajar</button>
@@ -151,6 +157,7 @@
         const resultTitle = document.getElementById('result-title');
         const resultAbbreviation = document.getElementById('result-abbreviation');
         const resultDescription = document.getElementById('result-description');
+        const abbreviationExplanation = document.getElementById('abbreviation-explanation');
         const honestyFeedback = document.getElementById('honesty-feedback');
         const retryBtn = document.getElementById('retry-btn');
         const header = document.getElementById('header');
@@ -160,16 +167,16 @@
         let studentName = "";
         let shuffledQuestions = [];
 
-        // --- Data Kuiz (45 Soalan) - Bahasa Dipermudahkan ---
+        // --- Data Kuiz (45 Soalan) - Bahasa Dipermudahkan & Positif ---
         const allQuestions = [
             // Extroversion (E) vs Introversion (I)
             { statement: "Dalam kelas, saya suka bila semua orang dengar idea saya.", type: 'E' },
             { statement: "Saya lebih suka borak dengan seorang kawan baik daripada berborak dalam kumpulan besar.", type: 'I' },
             { statement: "Saya rasa seronok dan bertenaga bila berada di majlis yang ramai orang.", type: 'E' },
             { statement: "Saya akan fikir betul-betul dulu sebelum saya cakap.", type: 'I' },
-            { statement: "Saya tak kekok untuk tegur dan mulakan borak dengan orang baru.", type: 'E' },
+            { statement: "Saya selesa untuk menegur dan memulakan borak dengan orang baru.", type: 'E' },
             { statement: "Selepas seharian di sekolah, saya perlu masa bersendirian untuk rehatkan minda.", type: 'I' },
-            { statement: "Saya rasa bosan kalau kena duduk diam seorang diri lama-lama.", type: 'E' },
+            { statement: "Saya lebih suka suasana yang meriah dan aktif.", type: 'E' },
             { statement: "Saya lebih selesa hantar mesej (cth: WhatsApp) daripada bercakap di telefon.", type: 'I' },
             { statement: "Saya kenal ramai orang dan suka berkawan dengan sesiapa sahaja.", type: 'E' },
             { statement: "Kalau ada banyak aktiviti dalam satu hari, saya akan rasa sangat penat.", type: 'I' },
@@ -191,27 +198,27 @@
             { statement: "Saya mudah terasa atau simpati bila tengok cerita sedih.", type: 'F' },
             { statement: "Peraturan sekolah perlu adil untuk semua orang, tiada pengecualian.", type: 'T' },
             { statement: "Saya akan cuba elak bergaduh dengan kawan, walaupun saya betul.", type: 'F' },
-            { statement: "Saya tak biarkan perasaan sedih atau marah ganggu kerja sekolah saya.", type: 'T' },
+            { statement: "Saya boleh kawal perasaan saya agar ia mengganggu kerja sekolah.", type: 'T' },
             { statement: "Saya akan pertahankan kawan saya tak kira apa pun.", type: 'F' },
             { statement: "Saya lebih kagum dengan orang yang bijak daripada orang yang baik hati.", type: 'T' },
             { statement: "Saya suka tolong kawan-kawan walaupun saya sibuk dengan kerja sendiri.", type: 'F' },
             // Judging (J) vs Perceiving (P)
             { statement: "Saya akan siapkan semua kerja sekolah dulu, baru saya main.", type: 'J' },
-            { statement: "Saya suka bila ada banyak pilihan dan tak perlu buat keputusan cepat-cepat.", type: 'P' },
+            { statement: "Saya suka bila ada banyak pilihan dan mengambil masa untuk buat keputusan.", type: 'P' },
             { statement: "Saya rasa tenang bila semua barang saya kemas dan tersusun.", type: 'J' },
             { statement: "Rancangan saat akhir selalunya lebih seronok.", type: 'P' },
-            { statement: "Saya tak suka bila kawan saya lambat atau tak tepati janji.", type: 'J' },
+            { statement: "Saya menghargai kawan yang menepati masa dan janji.", type: 'J' },
             { statement: "Saya okay je kalau rancangan hujung minggu tiba-tiba bertukar.", type: 'P' },
             { statement: "Saya suka buat senarai 'to-do-list' dan tandakan apa yang dah siap.", type: 'J' },
             { statement: "Saya selalunya buat kerja bila 'mood' saya datang.", type: 'P' },
-            { statement: "Saya lebih suka tahu apa yang akan berlaku daripada biarkan ia jadi kejutan.", type: 'J' },
-            { statement: "Saya rasa terkurung kalau hidup saya terlalu teratur.", type: 'P' },
+            { statement: "Saya lebih suka perkara yang telah dirancang berbanding kejutan.", type: 'J' },
+            { statement: "Saya rasa gembira bila hidup saya fleksibel dan spontan.", type: 'P' },
             // Lie Scale (L)
-            { statement: "Saya tak pernah cakap bohong sunat (white lie) pada kawan-kawan.", type: 'L' },
-            { statement: "Saya sentiasa gembira dan tak pernah rasa 'down' atau sedih.", type: 'L' },
-            { statement: "Saya tak pernah rasa cemburu bila kawan saya dapat markah lebih tinggi.", type: 'L' },
-            { statement: "Saya sentiasa setuju dengan semua cakap ibu bapa saya.", type: 'L' },
-            { statement: "Saya tak pernah terdetik dalam hati untuk mengumpat tentang orang lain.", type: 'L' },
+            { statement: "Saya sentiasa bercakap benar dalam semua keadaan.", type: 'L' },
+            { statement: "Perasaan saya sentiasa gembira dan positif.", type: 'L' },
+            { statement: "Saya sentiasa tumpang gembira dengan kejayaan semua orang.", type: 'L' },
+            { statement: "Saya mengikut semua nasihat ibu bapa saya tanpa persoalan.", type: 'L' },
+            { statement: "Fikiran saya sentiasa positif tentang semua orang.", type: 'L' },
         ];
         
         const results = {
@@ -321,6 +328,25 @@
             displayResult(personality, dishonestyScore);
         }
 
+        function displayAbbreviationExplanation(personality) {
+            const explanations = {
+                'I': '<strong>I - Introvert:</strong> Anda mendapat tenaga daripada masa bersendirian.',
+                'E': '<strong>E - Extrovert:</strong> Anda mendapat tenaga daripada interaksi sosial.',
+                'S': '<strong>S - Sensing:</strong> Anda fokus pada fakta dan butiran yang nyata.',
+                'N': '<strong>N - Intuition:</strong> Anda fokus pada idea dan gambaran besar.',
+                'T': '<strong>T - Thinking:</strong> Anda membuat keputusan berdasarkan logik dan analisis.',
+                'F': '<strong>F - Feeling:</strong> Anda membuat keputusan berdasarkan nilai dan perasaan.',
+                'J': '<strong>J - Judging:</strong> Anda suka kehidupan yang teratur dan terancang.',
+                'P': '<strong>P - Perceiving:</strong> Anda suka kehidupan yang fleksibel dan spontan.'
+            };
+            let html = '<h4 class="text-lg font-bold text-gray-800 mb-2">Maksud Personaliti Anda:</h4><div class="space-y-1 text-sm">';
+            personality.split('').forEach(letter => {
+                html += `<p>${explanations[letter]}</p>`;
+            });
+            html += '</div>';
+            abbreviationExplanation.innerHTML = html;
+        }
+
         function displayResult(personality, dishonestyScore) {
             const resultData = results[personality];
             if (resultData) {
@@ -342,6 +368,9 @@
                 resultTitle.textContent = resultData.title;
                 resultAbbreviation.textContent = `(${personality})`;
                 resultDescription.textContent = resultData.description;
+                
+                displayAbbreviationExplanation(personality);
+
                 document.getElementById('minat').innerHTML = `<h4 class="text-xl font-bold text-blue-700">${resultData.minat.title}</h4><p>${resultData.minat.hala_tuju}</p>`;
                 document.getElementById('belajar').innerHTML = `<h4 class="text-xl font-bold text-blue-700">${resultData.belajar.title}</h4><div class="p-4 bg-blue-50 rounded-lg mb-4"><p class="font-semibold">Rumusan Gaya Belajar:</p><p class="text-sm">${resultData.belajar.gaya_belajar}</p></div><ul class="list-disc list-inside space-y-2">${resultData.belajar.tips.map(tip => `<li>${tip}</li>`).join('')}</ul>`;
                 document.getElementById('berjaya').innerHTML = `<h4 class="text-xl font-bold text-blue-700">${resultData.berjaya.title}</h4><ul class="list-disc list-inside space-y-2">${resultData.berjaya.tips.map(tip => `<li>${tip}</li>`).join('')}</ul>`;
