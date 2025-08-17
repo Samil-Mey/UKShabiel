@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kuiz Personaliti & Kerjaya</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+        }
+        .tab-button.active {
+            background-color: #3B82F6; /* bg-blue-600 */
+            color: white;
+            border-color: #3B82F6;
+        }
+        .tab-button {
+            border-bottom: 2px solid transparent;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <div class="container mx-auto p-4 sm:p-6 md:p-8 max-w-3xl">
+        
+        <header id="header" class="text-center mb-8">
+            <h1 class="text-3xl sm:text-4xl font-bold text-blue-700">Kuiz Personaliti & Pembelajaran</h1>
+            <p class="mt-2 text-md sm:text-lg text-blue-600">Jom kenali potensi diri anda! Jawab 12 soalan ini untuk tahu cara belajar dan bidang yang sesuai untuk anda.</p>
+        </header>
+
+        <div id="quiz-container" class="bg-white p-6 sm:p-8 rounded-2xl shadow-lg space-y-6">
+            <!-- Questions will be injected here by JavaScript -->
+        </div>
+
+        <div id="button-container" class="text-center mt-8">
+            <button id="submit-btn" class="bg-blue-600 text-white font-bold py-3 px-8 rounded-full hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all duration-300 transform hover:scale-105">
+                Lihat Keputusan Saya
+            </button>
+            <p id="error-msg" class="text-red-500 mt-4 hidden">Sila jawab semua soalan ya!</p>
+        </div>
+
+        <div id="result-container" class="hidden bg-white rounded-2xl shadow-lg mt-8 overflow-hidden">
+            <div class="p-6 sm:p-8 bg-blue-600 text-white text-center">
+                <h2 class="text-xl sm:text-2xl font-bold">Anda ialah seorang...</h2>
+                <h3 id="result-title" class="text-3xl sm:text-4xl font-extrabold mt-1"></h3>
+            </div>
+            
+            <div class="p-6 sm:p-8">
+                <p id="result-description" class="text-md sm:text-lg text-center mb-8"></p>
+
+                <!-- Tabs Navigation -->
+                <div class="flex justify-center border-b border-gray-200 mb-6">
+                    <button class="tab-button active text-sm sm:text-base font-semibold py-3 px-4 sm:px-6 focus:outline-none" onclick="openTab('minat')">Minat & Bidang</button>
+                    <button class="tab-button text-sm sm:text-base font-semibold py-3 px-4 sm:px-6 focus:outline-none" onclick="openTab('belajar')">Cara Belajar</button>
+                    <button class="tab-button text-sm sm:text-base font-semibold py-3 px-4 sm:px-6 focus:outline-none" onclick="openTab('berjaya')">Tips Kejayaan</button>
+                </div>
+
+                <!-- Tabs Content -->
+                <div id="minat" class="tab-content space-y-4">
+                    <!-- Content injected by JS -->
+                </div>
+                <div id="belajar" class="tab-content hidden space-y-3">
+                    <!-- Content injected by JS -->
+                </div>
+                <div id="berjaya" class="tab-content hidden space-y-3">
+                    <!-- Content injected by JS -->
+                </div>
+            </div>
+
+            <div class="p-6 bg-gray-50 text-center">
+                <button id="retry-btn" class="bg-gray-600 text-white font-bold py-3 px-8 rounded-full hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-300 transition-all duration-300 transform hover:scale-105">
+                    Cuba Lagi
+                </button>
+            </div>
+        </div>
+        
+        <footer class="text-center text-gray-500 text-sm mt-12 pb-4">
+            <p>Dicipta untuk membantu pelajar mengenali potensi diri.</p>
+        </footer>
+    </div>
+
+    <script>
+        // --- Elements ---
+        const quizContainer = document.getElementById('quiz-container');
+        const submitBtn = document.getElementById('submit-btn');
+        const errorMsg = document.getElementById('error-msg');
+        const resultContainer = document.getElementById('result-container');
+        const resultTitle = document.getElementById('result-title');
+        const resultDescription = document.getElementById('result-description');
+        const retryBtn = document.getElementById('retry-btn');
+        const header = document.getElementById('header');
+        const buttonContainer = document.getElementById('button-container');
+
+        // --- Data Kuiz ---
+        const questions = [
+            { question: "Selepas waktu sekolah, anda lebih suka...", answers: { E: "Lepak dan berborak dengan kawan-kawan.", I: "Balik rumah dan berehat seorang diri." } },
+            { question: "Dalam perbincangan kumpulan, anda...", answers: { E: "Suka memberi idea dan banyak bercakap.", I: "Lebih banyak mendengar dan berfikir dahulu." } },
+            { question: "Bila ada majlis atau parti, anda rasa...", answers: { E: "Sangat seronok dan bertenaga jumpa ramai orang.", I: "Agak penat dan lebih selesa dengan beberapa kawan rapat sahaja." } },
+            { question: "Bila cikgu ajar subjek baru, anda...", answers: { S: "Fokus pada fakta dan cara buat langkah demi langkah.", N: "Suka fikir tentang idea besar dan kenapa ia penting." } },
+            { question: "Apabila membuat projek sekolah, anda lebih suka...", answers: { S: "Ikut arahan yang jelas dan contoh yang diberi.", N: "Mencuba cara baru yang kreatif dan berbeza." } },
+            { question: "Anda lebih minat cerita yang...", answers: { S: "Berdasarkan kisah benar dan realistik.", N: "Penuh dengan fantasi, simbol dan makna tersirat." } },
+            { question: "Kawan baik anda ada masalah. Anda akan...", answers: { T: "Bagi cadangan logik untuk selesaikan masalah.", F: "Dengar luahan dia dan bagi sokongan emosi." } },
+            { question: "Apabila membuat keputusan penting, anda utamakan...", answers: { T: "Kebaikan dan keburukan secara logik.", F: "Perasaan anda dan kesan kepada orang lain." } },
+            { question: "Lebih penting untuk jadi seorang yang...", answers: { T: "Adil dan saksama.", F: "Baik hati dan bertimbang rasa." } },
+            { question: "Ada kerja sekolah yang kena hantar minggu depan. Anda...", answers: { J: "Terus siapkan awal-awal, tak suka tangguh.", P: "Buat bila ada 'mood', selalunya dekat-dekat tarikh akhir." } },
+            { question: "Rancangan hujung minggu anda...", answers: { J: "Sudah dirancang dengan teliti.", P: "Biar spontan, tengok keadaan nanti." } },
+            { question: "Meja belajar anda biasanya...", answers: { J: "Kemas dan tersusun rapi.", P: "Agak bersepah, tapi anda tahu di mana barang anda." } }
+        ];
+
+        const results = {
+            "ISTJ": {
+                title: "Pemeriksa yang Teliti",
+                description: "Anda seorang yang praktikal, bertanggungjawab dan boleh diharap. Anda suka ikut peraturan dan pastikan semua kerja siap dengan sempurna.",
+                minat: {
+                    title: "🔍 Minat & Kecenderungan Bidang",
+                    subjek: "Matematik, Sains, Sejarah, Prinsip Perakaunan.",
+                    bidang: "Akauntan, Pustakawan, Pengaturcara Komputer, Inspektor Polis, Juruteknik."
+                },
+                belajar: {
+                    title: "📚 Cara Belajar Paling Sesuai",
+                    tips: ["Buat jadual belajar yang kemas dan ikut betul-betul.", "Suka belajar di tempat yang senyap dan teratur.", "Faham sesuatu bila ada contoh yang jelas dan fakta yang betul.", "Buat nota yang ringkas dan tersusun."]
+                },
+                berjaya: {
+                    title: "🏆 Tips Untuk Berjaya",
+                    tips: ["Gunakan sifat teliti awak untuk semak kerja sekolah supaya tiada kesilapan.", "Jangan takut untuk tanya cikgu jika tak faham, awak suka maklumat yang tepat.", "Siapkan kerja awal, jangan tunggu 'last minute'."]
+                }
+            },
+            "ISFJ": {
+                title: "Pelindung yang Setia",
+                description: "Anda seorang yang sangat baik hati, prihatin dan setia kawan. Anda sentiasa sedia membantu orang lain dan sangat mengambil berat tentang perasaan mereka.",
+                minat: {
+                    title: "🤝 Minat & Kecenderungan Bidang",
+                    subjek: "Pendidikan Moral, Sejarah, Biologi, Pendidikan Seni.",
+                    bidang: "Jururawat, Guru Tadika, Kaunselor, Pekerja Sosial, Doktor Haiwan."
+                },
+                belajar: {
+                    title: "📚 Cara Belajar Paling Sesuai",
+                    tips: ["Belajar akan lebih berkesan bila anda tahu ia dapat membantu orang lain.", "Suka belajar langkah demi langkah dengan arahan yang jelas.", "Buat nota yang kemas dan cantik untuk mudah ingat.", "Belajar dalam kumpulan kecil dengan kawan rapat."]
+                },
+                berjaya: {
+                    title: "🏆 Tips Untuk Berjaya",
+                    tips: ["Gunakan sifat baik hati awak untuk bantu kawan yang lemah dalam pelajaran.", "Jangan lupa jaga diri sendiri, jangan terlalu risaukan orang lain sampai terabai kerja sekolah.", "Sertai aktiviti sukarelawan di sekolah."]
+                }
+            },
+            "INFJ": {
+                title: "Penasihat yang Bijaksana",
+                description: "Anda seorang yang pendiam tetapi mempunyai idea yang mendalam. Anda suka memahami orang lain dan ingin menjadikan dunia ini lebih baik.",
+                minat: {
+                    title: "💡 Minat & Kecenderungan Bidang",
+                    subjek: "Bahasa (Sastera), Sejarah, Pendidikan Moral, Psikologi.",
+                    bidang: "Kaunselor, Penulis, Ahli Psikologi, Guru, Pereka Grafik."
+                },
+                belajar: {
+                    title: "📚 Cara Belajar Paling Sesuai",
+                    tips: ["Anda lebih faham bila dapat kaitkan pelajaran dengan gambaran besar atau nilai murni.", "Suka belajar bersendirian di tempat yang tenang.", "Gunakan peta minda untuk hubungkan idea-idea.", "Tulis semula nota dengan ayat sendiri untuk lebih faham."]
+                },
+                berjaya: {
+                    title: "🏆 Tips Untuk Berjaya",
+                    tips: ["Percaya pada idea-idea unik anda dan kongsikannya dalam kelas.", "Cari kawan yang memahami dan boleh bincang idea-idea besar bersama.", "Tulis jurnal atau blog untuk luahkan fikiran anda."]
+                }
+            },
+             "INTJ": {
+                title: "Penganalisis yang Strategik",
+                description: "Anda seorang yang bijak, suka merancang dan sentiasa dahagakan ilmu. Anda suka selesaikan masalah yang rumit dan ada perancangan untuk semua benda.",
+                minat: {
+                    title: "🧠 Minat & Kecenderungan Bidang",
+                    subjek: "Sains Tulen (Fizik, Kimia), Matematik Tambahan, Reka Cipta.",
+                    bidang: "Saintis, Jurutera, Arkitek, Penganalisis Data, Peguam."
+                },
+                belajar: {
+                    title: "📚 Cara Belajar Paling Sesuai",
+                    tips: ["Suka belajar sendiri untuk faham konsep yang mendalam.", "Lebih minat teori dan idea berbanding fakta hafalan.", "Cabar diri dengan soalan-soalan KBAT (Kemahiran Berfikir Aras Tinggi).", "Belajar topik yang mencabar intelek anda."]
+                },
+                berjaya: {
+                    title: "🏆 Tips Untuk Berjaya",
+                    tips: ["Jangan takut untuk persoalkan sesuatu sehingga anda betul-betul faham.", "Tetapkan matlamat jangka panjang untuk diri sendiri.", "Belajar untuk bekerjasama dengan orang lain, walaupun anda suka buat kerja sendiri."]
+                }
+            },
+            "ENFP": {
+                title: "Wira yang Bersemangat",
+                description: "Anda seorang yang ceria, kreatif dan sangat suka berkawan! Anda sentiasa ada idea baru dan suka ajak orang lain untuk sertai keseronokan.",
+                minat: {
+                    title: "🎨 Minat & Kecenderungan Bidang",
+                    subjek: "Bahasa, Pendidikan Seni, Geografi, Muzik, Drama.",
+                    bidang: "Wartawan, Guru, Pelakon, Pakar Motivasi, Usahawan Kreatif."
+                },
+                belajar: {
+                    title: "📚 Cara Belajar Paling Sesuai",
+                    tips: ["Belajar jadi seronok bila bincang dengan kawan-kawan (brainstorming).", "Guna kad imbasan berwarna-warni atau lukis nota untuk lebih ingat.", "Suka belajar topik yang menarik dan berkaitan dengan manusia.", "Perlukan kebebasan untuk belajar dengan cara sendiri."]
+                },
+                berjaya: {
+                    title: "🏆 Tips Untuk Berjaya",
+                    tips: ["Sertai aktiviti kokurikulum seperti debat atau kelab drama untuk serlahkan bakat.", "Cuba fokus siapkan satu tugasan sebelum mula yang lain, jangan mudah hilang fokus!", "Gunakan semangat anda untuk beri inspirasi kepada kawan-kawan."]
+                }
+            },
+             "ENTJ": {
+                title: "Komander yang Berani",
+                description: "Anda seorang yang berani, berwawasan dan tegas. Anda seorang pemimpin semula jadi yang sentiasa mencari jalan untuk mencapai matlamat.",
+                minat: {
+                    title: "🚀 Minat & Kecenderungan Bidang",
+                    subjek: "Ekonomi, Perniagaan, Matematik, Sejarah (Peperangan & Strategi).",
+                    bidang: "Ahli Perniagaan, CEO, Peguam, Pengurus Projek, Pemimpin Politik."
+                },
+                belajar: {
+                    title: "📚 Cara Belajar Paling Sesuai",
+                    tips: ["Suka belajar sesuatu yang logik dan boleh digunakan untuk capai matlamat.", "Belajar dengan berdebat atau berbincang dengan orang lain.", "Fokus pada matlamat utama dan cari cara paling efisien untuk belajar.", "Suka memimpin kumpulan belajar."]
+                },
+                berjaya: {
+                    title: "🏆 Tips Untuk Berjaya",
+                    tips: ["Jadi ketua kelas atau pemimpin dalam persatuan.", "Belajar untuk mendengar pandangan orang lain, bukan semua idea awak yang terbaik.", "Jangan takut gagal, anggap ia sebagai satu pelajaran."]
+                }
+            },
+            "ISFP": {
+                title: "Pengembara yang Artistik",
+                description: "Anda seorang yang santai, mesra dan mempunyai jiwa seni. Anda suka menikmati keindahan sekeliling dan mengekspresikan diri melalui seni atau muzik.",
+                minat: {
+                    title: "🎨 Minat & Kecenderungan Bidang",
+                    subjek: "Pendidikan Seni Visual, Muzik, Reka Bentuk & Teknologi, Geografi.",
+                    bidang: "Artis, Pereka Fesyen, Jurugambar, Pemuzik, Chef."
+                },
+                belajar: {
+                    title: "📚 Cara Belajar Paling Sesuai",
+                    tips: ["Belajar dengan cara 'hands-on' atau praktikal, bukan sekadar teori.", "Lebih suka persekitaran belajar yang santai dan tidak tertekan.", "Gunakan kreativiti untuk buat nota yang menarik.", "Belajar mengikut rentak sendiri."]
+                },
+                berjaya: {
+                    title: "🏆 Tips Untuk Berjaya",
+                    tips: ["Sertai kelab seni atau muzik di sekolah.", "Jangan takut untuk tunjukkan hasil kerja kreatif anda.", "Cari cara untuk jadikan rutin harian lebih menarik dan seronok."]
+                }
+            },
+            "INFP": {
+                title: "Pengantara yang Puitis",
+                description: "Anda seorang yang idealistik, baik hati dan dipandu oleh nilai murni anda. Anda sangat kreatif dan suka berimaginasi.",
+                minat: {
+                    title: "💖 Minat & Kecenderungan Bidang",
+                    subjek: "Sastera, Bahasa, Sejarah, Pendidikan Seni.",
+                    bidang: "Penulis, Penyajak, Kaunselor, Pustakawan, Aktivis Sosial."
+                },
+                belajar: {
+                    title: "📚 Cara Belajar Paling Sesuai",
+                    tips: ["Belajar akan lebih bermakna jika ia selari dengan nilai peribadi anda.", "Suka belajar bersendirian untuk berimaginasi dan berfikir.", "Tulis esei atau cerita untuk luahkan pemahaman anda.", "Kaitkan pelajaran dengan isu-isu dunia sebenar."]
+                },
+                berjaya: {
+                    title: "🏆 Tips Untuk Berjaya",
+                    tips: ["Teruskan berpegang pada prinsip anda.", "Cari kawan yang menghargai keunikan anda.", "Gunakan kreativiti anda untuk menyelesaikan masalah dengan cara yang berbeza."]
+                }
+            },
+            "ISTP": {
+                title: "Pengkarya yang Cekap",
+                description: "Anda seorang yang berani, praktikal dan pandai menggunakan alatan. Anda suka belajar dengan cara 'hands-on' dan sangat pandai menyelesaikan masalah teknikal.",
+                minat: {
+                    title: "🛠️ Minat & Kecenderungan Bidang",
+                    subjek: "Reka Bentuk & Teknologi, Kemahiran Hidup, Fizik, Geografi.",
+                    bidang: "Mekanik, Jurutera, Atlet, Juruterbang, Anggota Bomba."
+                },
+                belajar: {
+                    title: "📚 Cara Belajar Paling Sesuai",
+                    tips: ["Belajar dengan membuat atau mencuba sendiri, bukan hanya membaca.", "Suka menyelesaikan masalah praktikal dan logik.", "Tidak suka peraturan yang terlalu ketat.", "Faham sesuatu dengan cepat bila dapat lihat ia berfungsi."]
+                },
+                berjaya: {
+                    title: "🏆 Tips Untuk Berjaya",
+                    tips: ["Sertai kelab robotik atau aktiviti lasak.", "Belajar dari kesilapan dan cuba lagi.", "Fokus pada subjek yang membolehkan anda membuat sesuatu dengan tangan."]
+                }
+            },
+            "INTP": {
+                title: "Pemikir yang Inovatif",
+                description: "Anda seorang yang sangat pintar dan sentiasa ada idea-idea baru yang unik. Anda suka menganalisis corak dan menyelesaikan masalah yang mencabar.",
+                minat: {
+                    title: "💡 Minat & Kecenderungan Bidang",
+                    subjek: "Matematik Tambahan, Fizik, Kimia, Sains Komputer.",
+                    bidang: "Saintis, Ahli Falsafah, Profesor, Pengaturcara Komputer, Penganalisis Sistem."
+                },
+                belajar: {
+                    title: "📚 Cara Belajar Paling Sesuai",
+                    tips: ["Suka belajar konsep yang kompleks dan abstrak.", "Perlukan ruang untuk berfikir sendiri tanpa gangguan.", "Belajar dengan mempersoalkan 'kenapa' dan 'bagaimana'.", "Tidak suka menghafal fakta tanpa memahaminya."]
+                },
+                berjaya: {
+                    title: "🏆 Tips Untuk Berjaya",
+                    tips: ["Jangan takut untuk berkongsi idea gila anda, mungkin ia bernas!", "Cari guru atau mentor yang boleh mencabar pemikiran anda.", "Belajar untuk siapkan tugasan, bukan hanya berfikir tentangnya."]
+                }
+            },
+            "ESTP": {
+                title: "Usahawan yang Cergas",
+                description: "Anda seorang yang bertenaga, pandai dan suka hidup dalam keseronokan. Anda bijak mengambil peluang dan tidak takut untuk mengambil risiko.",
+                minat: {
+                    title: "🌟 Minat & Kecenderungan Bidang",
+                    subjek: "Pendidikan Jasmani, Perniagaan, Geografi.",
+                    bidang: "Ahli Sukan, Usahawan, Jurujual, Paramedik, Anggota Polis."
+                },
+                belajar: {
+                    title: "📚 Cara Belajar Paling Sesuai",
+                    tips: ["Belajar dengan melakukan aktiviti atau permainan.", "Suka persekitaran b
